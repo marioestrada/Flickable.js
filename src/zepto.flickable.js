@@ -655,6 +655,8 @@
 					$(this).one('click', function(e) { e.preventDefault(); });
 				(Math.abs(eventData.delta.dist.x) >= minTravelDistance) ? flickX = dirX : flickX = 0;
 			} else if((speedY > flickThreshold)) {
+				if(el)
+					$(this).one('click', function(e) { e.preventDefault(); });
 				(Math.abs(eventData.delta.dist.y) >= minTravelDistance) ? flickY = dirY : flickY = 0;
 			}
 
