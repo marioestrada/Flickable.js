@@ -11,7 +11,6 @@
  * Zepto JavaScript Library
  */
 (function( $ ){
-
 	var eventData, 
 	 	eventDataObject = {
 	
@@ -38,7 +37,8 @@
 		flickableObjects 	= 0, 	 			// Number of flickable objects that have been initialised
 		flickThreshold 		= 0.7, 	 			// Threshold in which a "touch and move" becomes a "flick" (the higher the number, the faster the swipe)
 		minTravelDistance	= 5, 				// This is the minimum distance in px the user's finger must travel for it to be considered a valid flick
-		debug 				= false; 			// If true, a floating div will display event data on screen during touches
+		debug 				= false, 			// If true, a floating div will display event data on screen during touches
+		element_moving;
 
 
 	var methods = {
@@ -134,7 +134,7 @@
 							},
 							
 							mousedown: function(e) {
-								window.flick_down = $(this)[0];
+								element_moving = $(this)[0];
 								e.preventDefault();
 								
 								_resetEventData(e);
@@ -165,7 +165,7 @@
 
 						$('body').bind({
 							mousemove: function(e) {
-								el = $(window.flick_down);
+								el = $(element_moving);
 								
 								if(el && el.length) {
 									if(settings.preventDefault) {
@@ -177,8 +177,8 @@
 							},
 							mouseup: function(e) {
 							
-								el = $(window.flick_down);
-								window.flick_down = null;
+								el = $(element_moving);
+								element_moving = null;
 								
 								if(el) {
 									e.preventDefault();
@@ -650,7 +650,7 @@
 			flickY		= 0;
 
 			if((speedX > flickThreshold)) {
-				el = $(window.flick_down);
+				el = $(element_moving);
 				if(el)
 					$(this).one('click', function(e) { e.preventDefault(); });
 				(Math.abs(eventData.delta.dist.x) >= minTravelDistance) ? flickX = dirX : flickX = 0;
