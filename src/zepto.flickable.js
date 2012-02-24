@@ -133,6 +133,14 @@
 								$(this).flickable('flickDown', settings.onFlickDown);
 							},
 							
+							mousedown: function(e) {
+								window.flick_down = $(this)[0];
+								e.preventDefault();
+								
+								_resetEventData(e);
+								$(this).trigger("onStart");
+							},
+							
 							touchstart: function(e) {
 								_resetEventData(e);
 								$(this).trigger("onStart");
@@ -155,6 +163,31 @@
 						
 						});
 
+						$('body').bind({
+							mousemove: function(e) {
+								el = $(window.flick_down);
+								
+								if(el && el.length) {
+									if(settings.preventDefault) {
+										e.preventDefault();
+									}
+									_updateDelta(e);
+									el.trigger("onMove");
+								}
+							},
+							mouseup: function(e) {
+							
+								el = $(window.flick_down);
+								window.flick_down = null;
+								
+								if(el) {
+									e.preventDefault();
+									
+									_endTouch(e);
+									el.trigger("onEnd");
+								}
+							}
+						});
 						
 						if(!_browserSupports('transform')){
 							// Browser does not support CSS3 transitions ಠ_ಠ
@@ -547,8 +580,8 @@
 		var pageX, pageY;
 
 		// Android and iOS structure event data differently
-		(typeof e.touches[0].pageX != 'undefined') ? pageX=e.touches[0].pageX : pageX=e.pageX; 
-		(typeof e.touches[0].pageY != 'undefined') ? pageY=e.touches[0].pageY : pageY=e.pageY;
+		(e.touches && typeof e.touches[0].pageX != 'undefined') ? pageX=e.touches[0].pageX : pageX=e.pageX; 
+		(e.touches && typeof e.touches[0].pageY != 'undefined') ? pageY=e.touches[0].pageY : pageY=e.pageY;
 
 		eventData 		= eventDataObject;
 		eventData.start = {x:pageX, y:pageY, time: e.timeStamp};
@@ -567,8 +600,8 @@
 		var pageX, pageY;
 		
 		// Android and iOS structure event data differently
-		(typeof e.touches[0].pageX != 'undefined') ? pageX=e.touches[0].pageX : pageX=e.pageX;
-		(typeof e.touches[0].pageY != 'undefined') ? pageY=e.touches[0].pageY : pageY=e.pageY;
+		(e.touches && typeof e.touches[0].pageX != 'undefined') ? pageX=e.touches[0].pageX : pageX=e.pageX;
+		(e.touches && typeof e.touches[0].pageY != 'undefined') ? pageY=e.touches[0].pageY : pageY=e.pageY;
 		
 		var dirX, dirY,
 			prevX 	= pageX, 
@@ -617,6 +650,9 @@
 			flickY		= 0;
 
 			if((speedX > flickThreshold)) {
+				el = $(window.flick_down);
+				if(el)
+					$(this).one('click', function(e) { e.preventDefault(); });
 				(Math.abs(eventData.delta.dist.x) >= minTravelDistance) ? flickX = dirX : flickX = 0;
 			} else if((speedY > flickThreshold)) {
 				(Math.abs(eventData.delta.dist.y) >= minTravelDistance) ? flickY = dirY : flickY = 0;
